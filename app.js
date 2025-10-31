@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 app.use(express.json()); // Parse JSON bodies
@@ -5,15 +7,23 @@ app.use(express.json()); // Parse JSON bodies
 let todos = [
   { id: 1, task: 'Learn Node.js', completed: false },
   { id: 2, task: 'Build CRUD API', completed: false },
+  { id: 2, task: 'Done with week-2 assignment', completed: true }
 ];
 
 // GET All – Read
-app.get('/todos', (req, res) => {
-  res.status(200).json(todos); // Send array as JSON
+app.get('/todos/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+
+  const todo = todos.find((t) => t.id === id);
+  res.status(200).json(todo); // Send array as JSON
 });
 
 // POST New – Create
 app.post('/todos', (req, res) => {
+  const completed = req.body.completed;
+  const task = req.body.task;
+  if (!task || !completed) return res.status(400).json({message: 'field required'});
+
   const newTodo = { id: todos.length + 1, ...req.body }; // Auto-ID
   todos.push(newTodo);
   res.status(201).json(newTodo); // Echo back
@@ -46,5 +56,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Server error!' });
 });
 
-const PORT = 3002;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server on port ${PORT}`));
